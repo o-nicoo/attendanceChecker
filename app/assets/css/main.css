@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-bg-border;
+  }
+
+  html {
+    @apply bg-bg-base text-text-primary antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg-base min-h-screen;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-base;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-card border border-bg-border rounded-xl p-5;
+  }
+
+  .card-elevated {
+    @apply bg-bg-elevated border border-bg-border rounded-xl p-5;
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer select-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-bg-base hover:bg-accent-hover active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary border border-bg-border hover:bg-bg-elevated hover:text-text-primary active:scale-95;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20 active:scale-95;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium;
+  }
+
+  .badge-in {
+    @apply badge bg-success/10 text-success;
+  }
+
+  .badge-out {
+    @apply badge bg-text-muted/20 text-text-secondary;
+  }
+
+  .badge-scan {
+    @apply badge bg-accent/10 text-accent;
+  }
+
+  .input {
+    @apply bg-bg-elevated border border-bg-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all;
+  }
+
+  .table-row {
+    @apply border-b border-bg-border last:border-0 hover:bg-bg-elevated/50 transition-colors;
+  }
+
+  .dot-online {
+    @apply w-2 h-2 rounded-full bg-success animate-pulse-slow;
+  }
+
+  .dot-offline {
+    @apply w-2 h-2 rounded-full bg-text-muted;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent;
+  }
+
+  .glow {
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 10px rgba(0, 212, 170, 0.1);
+  }
+}
