@@ -3,7 +3,7 @@
  * Called by the Raspberry Pi when an RFID chip is detected.
  *
  * Body:
- *   rfid_id   string  — the RFID chip ID
+ *   rfid_id   string  — the RFID chip ID (numeric card ID)
  *   direction string  — "enter" | "exit" (optional, defaults to toggle)
  *   secret    string  — optional shared secret (set via env SCAN_SECRET)
  */
@@ -24,51 +24,41 @@ export default defineEventHandler(async (event) => {
 
   const db = getDb()
 
-  // look up student
-  const student = db.prepare('SELECT * FROM students WHERE rfid_id = ?').get(rfid_id) as any
+  // look up student (rfid_id matches schueler.id)
+  const student = db.prepare(
+    'SELECT * FROM schueler WHERE id = CAST(? AS INTEGER)'
+  ).get(String(rfid_id)) as any
 
-  const currentPresence = db.prepare(
-    'SELECT status FROM presence WHERE rfid_id = ?'
-  ).get(rfid_id) as { status: string } | undefined
+  // determine current presence from last log entry
+  const lastLog = db.prepare(
+    'SELECT in_out FROM loggingW245 WHERE rfID = ? ORDER BY time DESC LIMIT 1'
+  ).get(String(rfid_id)) as { in_out: number } | undefined
 
-  // determine event type
-  let eventType: 'enter' | 'exit'
-  if (direction === 'enter' || direction === 'exit') {
-    eventType = direction
+  const currentlyIn = lastLog?.in_out === 1
+
+  let inOut: number
+  if (direction === 'enter') {
+    inOut = 1
+  } else if (direction === 'exit') {
+    inOut = 0
   } else {
-    // toggle
-    eventType = currentPresence?.status === 'in' ? 'exit' : 'enter'
+    inOut = currentlyIn ? 0 : 1
   }
 
-  const newStatus = eventType === 'enter' ? 'in' : 'out'
+  const now = new Date().toISOString().replace('T', ' ').substring(0, 19)
+  db.prepare('INSERT INTO loggingW245 (time, rfID, in_out) VALUES (?, ?, ?)').run(
+    now, String(rfid_id), inOut
+  )
 
-  db.transaction(() => {
-    // insert log
-    db.prepare(`
-      INSERT INTO attendance_logs (rfid_id, student_id, event_type)
-      VALUES (?, ?, ?)
-    `).run(rfid_id, student?.id ?? null, eventType)
-
-    // update presence
-    if (currentPresence) {
-      db.prepare(`
-        UPDATE presence
-        SET status = ?, last_seen = CURRENT_TIMESTAMP,
-            entered_at = CASE WHEN ? = 'in' THEN CURRENT_TIMESTAMP ELSE entered_at END
-        WHERE rfid_id = ?
-      `).run(newStatus, newStatus, rfid_id)
-    } else {
-      db.prepare(`
-        INSERT INTO presence (rfid_id, student_id, status, entered_at, last_seen)
-        VALUES (?, ?, ?, CASE WHEN ? = 'in' THEN CURRENT_TIMESTAMP ELSE NULL END, CURRENT_TIMESTAMP)
-      `).run(rfid_id, student?.id ?? null, newStatus, newStatus)
-    }
-  })()
+  const eventType = inOut === 1 ? 'enter' : 'exit'
+  const newStatus = inOut === 1 ? 'in' : 'out'
 
   return {
     rfid_id,
     event_type: eventType,
-    student: student ? { id: student.id, name: student.name, class: student.class } : null,
+    student: student
+      ? { id: student.id, name: `${student.vorname} ${student.nachname}`, class: student.klasse }
+      : null,
     status: newStatus,
   }
 })

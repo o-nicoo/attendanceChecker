@@ -5,7 +5,7 @@ export default defineEventHandler((event) => {
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Invalid ID' })
 
   const db = getDb()
-  const result = db.prepare('DELETE FROM students WHERE id = ?').run(id)
+  const result = db.prepare('DELETE FROM schueler WHERE id = ?').run(id)
 
   if (result.changes === 0) {
     throw createError({ statusCode: 404, statusMessage: 'Student not found' })

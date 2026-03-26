@@ -99,10 +99,10 @@
   }
 
   .glow {
-    box-shadow: 0 0 20px rgba(0, 212, 170, 0.15);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
   }
 
   .glow-sm {
-    box-shadow: 0 0 10px rgba(0, 212, 170, 0.1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
   }
 }

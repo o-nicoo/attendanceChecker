@@ -6,7 +6,9 @@ const { data: analytics } = await useFetch('/api/analytics')
 const { data: logs } = await useFetch('/api/logs', { query: { limit: 8 } })
 
 // auto-refresh presence every 10s
-useIntervalFn(() => refreshPresence(), 10_000)
+let timer: ReturnType<typeof setInterval>
+onMounted(() => { timer = setInterval(() => refreshPresence(), 10_000) })
+onUnmounted(() => clearInterval(timer))
 
 function formatTime(ts: string) {
   if (!ts) return '—'

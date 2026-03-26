@@ -13,31 +13,31 @@ export default defineEventHandler((event) => {
   const params: unknown[] = []
 
   if (date) {
-    where += ' AND DATE(l.timestamp) = ?'
+    where += ' AND DATE(l.time) = ?'
     params.push(date)
   }
   if (rfid) {
-    where += ' AND l.rfid_id = ?'
+    where += ' AND l.rfID = ?'
     params.push(rfid)
   }
 
   const logs = db.prepare(`
     SELECT
       l.id,
-      l.rfid_id,
-      l.event_type,
-      l.timestamp,
-      s.name  AS student_name,
-      s.class AS student_class
-    FROM attendance_logs l
-    LEFT JOIN students s ON l.student_id = s.id
+      l.rfID                                                AS rfid_id,
+      CASE WHEN l.in_out = 1 THEN 'enter' ELSE 'exit' END  AS event_type,
+      l.time                                                AS timestamp,
+      s.vorname || ' ' || s.nachname                       AS student_name,
+      s.klasse                                              AS student_class
+    FROM loggingW245 l
+    LEFT JOIN schueler s ON s.id = CAST(l.rfID AS INTEGER)
     ${where}
-    ORDER BY l.timestamp DESC
+    ORDER BY l.time DESC
     LIMIT ? OFFSET ?
   `).all(...params, limit, offset)
 
   const total = (db.prepare(`
-    SELECT COUNT(*) as c FROM attendance_logs l ${where}
+    SELECT COUNT(*) as c FROM loggingW245 l ${where}
   `).get(...params) as { c: number }).c
 
   return { logs, total, limit, offset }

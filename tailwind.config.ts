@@ -17,9 +17,9 @@ export default {
           border: '#242424',
         },
         accent: {
-          DEFAULT: '#00d4aa',
-          dim: '#00d4aa20',
-          hover: '#00e8bb',
+          DEFAULT: '#3b82f6',
+          dim: '#3b82f620',
+          hover: '#60a5fa',
         },
         success: '#2ed573',
         danger: '#ff4757',
