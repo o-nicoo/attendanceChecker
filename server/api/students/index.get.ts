@@ -7,22 +7,22 @@ export default defineEventHandler(() => {
     SELECT
       s.id,
       s.vorname || ' ' || s.nachname                        AS name,
-      CAST(s.id AS TEXT)                                    AS rfid_id,
+      s.id                                                  AS rfid_id,
       s.klasse                                              AS class,
       NULL                                                  AS created_at,
       CASE WHEN (
         SELECT in_out FROM loggingW245
-        WHERE rfID = CAST(s.id AS TEXT)
+        WHERE rfID = s.id
         ORDER BY time DESC LIMIT 1
       ) = 1 THEN 'in' ELSE 'out' END                        AS status,
       (
         SELECT time FROM loggingW245
-        WHERE rfID = CAST(s.id AS TEXT) AND in_out = 1
+        WHERE rfID = s.id AND in_out = 1
         ORDER BY time DESC LIMIT 1
       )                                                     AS entered_at,
       (
         SELECT time FROM loggingW245
-        WHERE rfID = CAST(s.id AS TEXT)
+        WHERE rfID = s.id
         ORDER BY time DESC LIMIT 1
       )                                                     AS last_seen
     FROM schueler s

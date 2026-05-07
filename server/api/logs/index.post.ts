@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
   // look up student (rfid_id matches schueler.id)
   const student = db.prepare(
-    'SELECT * FROM schueler WHERE id = CAST(? AS INTEGER)'
+    'SELECT * FROM schueler WHERE id = ?'
   ).get(String(rfid_id)) as any
 
   // determine current presence from last log entry

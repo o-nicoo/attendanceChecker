@@ -30,7 +30,7 @@ export default defineEventHandler((event) => {
       s.vorname || ' ' || s.nachname                       AS student_name,
       s.klasse                                              AS student_class
     FROM loggingW245 l
-    LEFT JOIN schueler s ON s.id = CAST(l.rfID AS INTEGER)
+    LEFT JOIN schueler s ON s.id = l.rfID
     ${where}
     ORDER BY l.time DESC
     LIMIT ? OFFSET ?

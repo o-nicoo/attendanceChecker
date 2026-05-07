@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ title: 'Students' })
+definePageMeta({ title: 'Schüler' })
 
 const { data: students, refresh } = await useFetch('/api/students')
 
@@ -7,11 +7,7 @@ const showModal = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const form = reactive({
-  name: '',
-  rfid_id: '',
-  class: '',
-})
+const form = reactive({ name: '', rfid_id: '', class: '' })
 
 async function addStudent() {
   if (!form.name || !form.rfid_id) return
@@ -35,7 +31,7 @@ async function addStudent() {
 }
 
 async function deleteStudent(id: number, name: string) {
-  if (!confirm(`Schüler "${name}" wirklich löschen?`)) return
+  if (!confirm(`Schüler „${name}" wirklich löschen?`)) return
   await $fetch(`/api/students/${id}`, { method: 'DELETE' })
   await refresh()
 }
@@ -44,31 +40,37 @@ const search = ref('')
 const filtered = computed(() => {
   if (!students.value) return []
   const q = search.value.toLowerCase()
-  return students.value.filter((s: any) =>
-    s.name.toLowerCase().includes(q) ||
-    s.rfid_id.toLowerCase().includes(q) ||
-    s.class.toLowerCase().includes(q)
+  return (students.value as any[]).filter((s: any) =>
+    (s.name ?? '').toLowerCase().includes(q) ||
+    (s.rfid_id ?? '').toLowerCase().includes(q) ||
+    (s.class ?? '').toLowerCase().includes(q),
   )
 })
 
 const grouped = computed(() => {
-  const groups: Record<string, any[]> = {}
+  const g: Record<string, any[]> = {}
   for (const s of filtered.value) {
-    const key = s.class || 'Ohne Klasse'
-    if (!groups[key]) groups[key] = []
-    groups[key].push(s)
+    const k = s.class || 'Ohne Klasse'
+    if (!g[k]) g[k] = []
+    g[k].push(s)
   }
-  return groups
+  return g
 })
+
+function initials(name: string) {
+  if (!name?.trim()) return '?'
+  return name.trim().split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+}
 </script>
 
 <template>
   <div class="space-y-6 animate-fade-in">
+
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-end justify-between pb-1">
       <div>
-        <h1 class="text-2xl font-semibold text-text-primary">Schüler</h1>
-        <p class="text-sm text-text-secondary mt-1">{{ students?.length ?? 0 }} registrierte Schüler</p>
+        <p class="text-xs font-semibold text-text-muted uppercase tracking-widest mb-1">Verwaltung</p>
+        <h1 class="text-3xl font-bold text-text-primary tracking-tight">Schüler</h1>
       </div>
       <button class="btn-primary" @click="showModal = true">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,56 +81,68 @@ const grouped = computed(() => {
     </div>
 
     <!-- Search -->
-    <input
-      v-model="search"
-      type="text"
-      placeholder="Name, RFID-ID oder Klasse suchen..."
-      class="input w-full max-w-sm"
-    />
+    <div class="relative max-w-sm">
+      <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        v-model="search"
+        type="text"
+        placeholder="Name, RFID-ID oder Klasse…"
+        class="input pl-10"
+      />
+    </div>
 
-    <!-- Student groups -->
-    <div class="space-y-6">
+    <!-- Groups -->
+    <div class="space-y-8">
       <div v-for="(group, className) in grouped" :key="className">
-        <div class="flex items-center gap-3 mb-3">
-          <h2 class="text-xs font-semibold text-text-secondary uppercase tracking-wider">{{ className }}</h2>
+
+        <div class="flex items-center gap-4 mb-3">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-widest">{{ className }}</span>
           <div class="flex-1 h-px bg-bg-border" />
-          <span class="text-xs text-text-muted">{{ group.length }}</span>
+          <span class="text-xs text-text-faint font-medium">{{ group.length }}</span>
         </div>
 
-        <div class="card p-0 overflow-hidden">
+        <div class="panel">
           <table class="w-full">
             <thead>
               <tr class="border-b border-bg-border">
-                <th class="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Name</th>
-                <th class="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">RFID-ID</th>
-                <th class="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
-                <th class="text-left px-4 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Zuletzt gesehen</th>
-                <th class="px-4 py-3" />
+                <th class="th">Name</th>
+                <th class="th">RFID-ID</th>
+                <th class="th">Status</th>
+                <th class="th">Zuletzt gesehen</th>
+                <th class="th w-px" />
               </tr>
             </thead>
             <tbody>
               <tr v-for="s in group" :key="s.id" class="table-row">
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-full bg-bg-elevated border border-bg-border flex items-center justify-center flex-shrink-0">
-                      <span class="text-xs font-semibold text-text-secondary">{{ s.name.charAt(0) }}</span>
+                <td class="px-5 py-4">
+                  <NuxtLink :to="`/students/${s.id}`" class="flex items-center gap-3 group">
+                    <div :class="s.status === 'in' ? 'avatar-in' : 'avatar-out'" class="w-9 h-9">
+                      {{ initials(s.name) }}
                     </div>
-                    <span class="text-sm text-text-primary font-medium">{{ s.name }}</span>
-                  </div>
+                    <span class="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors">{{ s.name || '—' }}</span>
+                  </NuxtLink>
                 </td>
-                <td class="px-4 py-3">
-                  <span class="text-xs font-mono text-text-secondary bg-bg-elevated px-2 py-1 rounded">{{ s.rfid_id }}</span>
+                <td class="px-5 py-4">
+                  <span class="text-xs font-mono text-text-muted bg-bg-elevated border border-bg-border px-2.5 py-1 rounded-lg">
+                    {{ s.rfid_id }}
+                  </span>
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-5 py-4">
                   <span :class="s.status === 'in' ? 'badge-in' : 'badge-out'">
                     {{ s.status === 'in' ? 'Im Raum' : 'Abwesend' }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-xs text-text-secondary">
-                  {{ s.last_seen ? new Date(s.last_seen).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—' }}
+                <td class="px-5 py-4 text-xs text-text-muted">
+                  {{ s.last_seen
+                    ? new Date(s.last_seen).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                    : '—' }}
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <button class="btn-danger text-xs py-1 px-2" @click="deleteStudent(s.id, s.name)">
+                <td class="px-5 py-4">
+                  <button class="btn-danger text-xs py-1.5 px-3" @click="deleteStudent(s.id, s.name)">
                     Löschen
                   </button>
                 </td>
@@ -138,41 +152,44 @@ const grouped = computed(() => {
         </div>
       </div>
 
-      <div v-if="!filtered.length" class="py-16 text-center">
-        <p class="text-text-muted text-sm">Keine Schüler gefunden.</p>
+      <div v-if="!filtered.length" class="flex flex-col items-center justify-center py-24 gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-bg-elevated border border-bg-border flex items-center justify-center">
+          <svg class="w-6 h-6 text-text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <p class="text-sm text-text-muted">Keine Schüler gefunden.</p>
       </div>
     </div>
 
-    <!-- Add Modal -->
+    <!-- Modal -->
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showModal = false" />
-        <div class="relative card w-full max-w-md animate-slide-up">
+        <div class="absolute inset-0 bg-bg-deep/80 backdrop-blur-sm" @click="showModal = false" />
+        <div class="relative panel p-6 w-full max-w-md animate-slide-up card-glow">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-base font-semibold text-text-primary">Neuer Schüler</h2>
-            <button class="text-text-muted hover:text-text-primary" @click="showModal = false">
+            <h2 class="text-base font-bold text-text-primary">Neuer Schüler</h2>
+            <button class="text-text-muted hover:text-text-primary transition-colors" @click="showModal = false">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-
           <form class="space-y-4" @submit.prevent="addStudent">
             <div>
-              <label class="block text-xs text-text-secondary mb-1.5">Name *</label>
-              <input v-model="form.name" type="text" placeholder="Max Mustermann" class="input w-full" required />
+              <label class="block text-xs font-semibold text-text-muted mb-2 uppercase tracking-wider">Name *</label>
+              <input v-model="form.name" type="text" placeholder="Max Mustermann" class="input" required />
             </div>
             <div>
-              <label class="block text-xs text-text-secondary mb-1.5">RFID-ID *</label>
-              <input v-model="form.rfid_id" type="text" placeholder="z. B. RFID-007" class="input w-full font-mono" required />
+              <label class="block text-xs font-semibold text-text-muted mb-2 uppercase tracking-wider">RFID-ID *</label>
+              <input v-model="form.rfid_id" type="text" placeholder="z. B. 1234567890" class="input font-mono" required />
             </div>
             <div>
-              <label class="block text-xs text-text-secondary mb-1.5">Klasse</label>
-              <input v-model="form.class" type="text" placeholder="z. B. 10A" class="input w-full" />
+              <label class="block text-xs font-semibold text-text-muted mb-2 uppercase tracking-wider">Klasse</label>
+              <input v-model="form.class" type="text" placeholder="z. B. W245" class="input" />
             </div>
-
             <p v-if="error" class="text-xs text-danger">{{ error }}</p>
-
             <div class="flex gap-3 pt-2">
               <button type="submit" class="btn-primary flex-1" :disabled="loading">
                 {{ loading ? 'Wird gespeichert…' : 'Hinzufügen' }}

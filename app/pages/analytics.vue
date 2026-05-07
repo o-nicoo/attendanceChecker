@@ -24,10 +24,10 @@ const hourlyCanvas = ref<HTMLCanvasElement>()
 let dailyChart: Chart | null = null
 let hourlyChart: Chart | null = null
 
-const ACCENT = '#00d4aa'
-const DANGER = '#ff4757'
-const GRID   = '#242424'
-const TEXT   = '#888888'
+const ACCENT = '#C9CBD0'
+const ACCENT2 = '#525870'
+const GRID   = '#1E2540'
+const TEXT   = '#525870'
 
 const chartDefaults = {
   responsive: true,
@@ -35,22 +35,25 @@ const chartDefaults = {
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#1c1c1c',
-      borderColor: '#242424',
+      backgroundColor: '#0E1017',
+      borderColor: '#1E2540',
       borderWidth: 1,
-      titleColor: '#f0f0f0',
-      bodyColor: '#888888',
-      padding: 10,
+      titleColor: '#F4F6FA',
+      bodyColor: '#8F94A3',
+      padding: 12,
+      cornerRadius: 8,
     },
   },
   scales: {
     x: {
       grid: { color: GRID },
       ticks: { color: TEXT, font: { size: 11 } },
+      border: { color: GRID },
     },
     y: {
       grid: { color: GRID },
       ticks: { color: TEXT, font: { size: 11 } },
+      border: { color: GRID },
       beginAtZero: true,
     },
   },
@@ -74,21 +77,23 @@ onMounted(() => {
             label: 'Eintritte',
             data: data.value.dailyAttendance.map((d: any) => d.entries),
             borderColor: ACCENT,
-            backgroundColor: `${ACCENT}15`,
+            backgroundColor: `${ACCENT}18`,
             fill: true,
             tension: 0.4,
             pointBackgroundColor: ACCENT,
-            pointRadius: 4,
+            pointRadius: 3,
+            borderWidth: 2,
           },
           {
             label: 'Austritte',
             data: data.value.dailyAttendance.map((d: any) => d.exits),
-            borderColor: DANGER,
-            backgroundColor: `${DANGER}10`,
+            borderColor: ACCENT2,
+            backgroundColor: `${ACCENT2}20`,
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: DANGER,
-            pointRadius: 4,
+            pointBackgroundColor: ACCENT2,
+            pointRadius: 3,
+            borderWidth: 2,
           },
         ],
       },
@@ -113,8 +118,8 @@ onMounted(() => {
         datasets: [{
           label: 'Eintritte',
           data: allHours.map(h => hourMap.get(h) || 0),
-          backgroundColor: `${ACCENT}40`,
-          borderColor: ACCENT,
+          backgroundColor: `${ACCENT2}60`,
+          borderColor: ACCENT2,
           borderWidth: 1,
           borderRadius: 4,
         }],
@@ -133,13 +138,13 @@ onUnmounted(() => {
 <template>
   <div class="space-y-8 animate-fade-in">
     <!-- Header -->
-    <div>
-      <h1 class="text-2xl font-semibold text-text-primary">Auswertung</h1>
-      <p class="text-sm text-text-secondary mt-1">Anwesenheitsstatistiken & Trends</p>
+    <div class="pb-1">
+      <p class="text-xs font-semibold text-text-muted uppercase tracking-widest mb-1">Statistiken</p>
+      <h1 class="text-3xl font-bold text-text-primary tracking-tight">Auswertung</h1>
     </div>
 
     <!-- Stat row -->
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="card">
         <p class="text-xs text-text-secondary uppercase tracking-wider">Schüler gesamt</p>
         <p class="text-3xl font-semibold text-text-primary mt-2">{{ data?.stats?.total_students ?? 0 }}</p>
@@ -159,7 +164,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Charts -->
-    <div class="grid grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card space-y-4">
         <h2 class="text-sm font-semibold text-text-primary">Anwesenheit (14 Tage)</h2>
         <div class="h-56">

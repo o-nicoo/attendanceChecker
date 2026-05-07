@@ -1,9 +1,9 @@
 <script setup lang="ts">
-definePageMeta({ title: 'Logs' })
+definePageMeta({ title: 'Protokoll' })
 
 const dateFilter = ref(new Date().toISOString().substring(0, 10))
 const page = ref(0)
-const limit = 25
+const limit = 30
 
 const { data, refresh } = await useFetch('/api/logs', {
   query: computed(() => ({
@@ -27,71 +27,74 @@ function formatTs(ts: string) {
 
 <template>
   <div class="space-y-6 animate-fade-in">
+
     <!-- Header -->
-    <div class="flex items-start justify-between">
+    <div class="flex items-end justify-between pb-1">
       <div>
-        <h1 class="text-2xl font-semibold text-text-primary">Protokoll</h1>
-        <p class="text-sm text-text-secondary mt-1">{{ data?.total ?? 0 }} Einträge</p>
+        <p class="text-xs font-semibold text-text-muted uppercase tracking-widest mb-1">Verlauf</p>
+        <h1 class="text-3xl font-bold text-text-primary tracking-tight">Protokoll</h1>
       </div>
       <div class="flex items-center gap-3">
-        <input
-          v-model="dateFilter"
-          type="date"
-          class="input text-sm"
-        />
-        <button class="btn-ghost text-xs" @click="dateFilter = ''; refresh()">Alle</button>
+        <input v-model="dateFilter" type="date" class="input w-auto" />
+        <button class="btn-ghost" @click="dateFilter = ''; refresh()">Alle</button>
+        <a :href="`/api/logs/export${dateFilter ? '?date=' + dateFilter : ''}`"
+           download class="btn-ghost">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          CSV Export
+        </a>
       </div>
     </div>
 
+    <!-- Count -->
+    <p class="text-sm text-text-muted">
+      <span class="text-text-secondary font-semibold tabular-nums">{{ data?.total ?? 0 }}</span>
+      Einträge{{ dateFilter ? ` am ${new Date(dateFilter + 'T12:00:00').toLocaleDateString('de-DE')}` : ' gesamt' }}
+    </p>
+
     <!-- Table -->
-    <div class="card p-0 overflow-hidden">
+    <div class="panel">
       <table class="w-full">
         <thead>
           <tr class="border-b border-bg-border">
-            <th class="text-left px-5 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Zeitstempel</th>
-            <th class="text-left px-5 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Schüler</th>
-            <th class="text-left px-5 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Klasse</th>
-            <th class="text-left px-5 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">RFID-ID</th>
-            <th class="text-left px-5 py-3 text-xs font-medium text-text-secondary uppercase tracking-wider">Ereignis</th>
+            <th class="th">Zeitstempel</th>
+            <th class="th">Schüler</th>
+            <th class="th">Klasse</th>
+            <th class="th">RFID-ID</th>
+            <th class="th">Ereignis</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="log in data?.logs" :key="log.id" class="table-row">
-            <td class="px-5 py-3 text-xs font-mono text-text-secondary whitespace-nowrap">
-              {{ formatTs(log.timestamp) }}
+            <td class="px-5 py-3.5">
+              <span class="text-xs font-mono text-text-muted">{{ formatTs(log.timestamp) }}</span>
             </td>
-            <td class="px-5 py-3">
-              <span class="text-sm text-text-primary">{{ log.student_name ?? '—' }}</span>
+            <td class="px-5 py-3.5">
+              <span class="text-sm font-medium text-text-primary">{{ log.student_name ?? '—' }}</span>
             </td>
-            <td class="px-5 py-3">
+            <td class="px-5 py-3.5">
               <span class="text-sm text-text-secondary">{{ log.student_class ?? '—' }}</span>
             </td>
-            <td class="px-5 py-3">
-              <span class="text-xs font-mono text-text-muted bg-bg-elevated px-2 py-0.5 rounded">{{ log.rfid_id }}</span>
+            <td class="px-5 py-3.5">
+              <span class="text-xs font-mono text-text-muted bg-bg-elevated border border-bg-border px-2.5 py-1 rounded-lg">
+                {{ log.rfid_id }}
+              </span>
             </td>
-            <td class="px-5 py-3">
-              <span
-                :class="{
-                  'badge-in': log.event_type === 'enter',
-                  'badge-out': log.event_type === 'exit',
-                  'badge-scan': log.event_type === 'unknown',
-                }"
-              >
-                <span
-                  :class="{
-                    'w-1 h-1 rounded-full bg-success': log.event_type === 'enter',
-                    'w-1 h-1 rounded-full bg-text-secondary': log.event_type === 'exit',
-                    'w-1 h-1 rounded-full bg-accent': log.event_type === 'unknown',
-                  }"
-                  class="inline-block"
-                />
+            <td class="px-5 py-3.5">
+              <span :class="{
+                'badge-in':   log.event_type === 'enter',
+                'badge-out':  log.event_type === 'exit',
+                'badge-scan': log.event_type === 'unknown',
+              }">
                 {{ log.event_type === 'enter' ? 'Eintritt' : log.event_type === 'exit' ? 'Austritt' : 'Scan' }}
               </span>
             </td>
           </tr>
           <tr v-if="!data?.logs?.length">
-            <td colspan="5" class="px-5 py-12 text-center text-sm text-text-muted">
-              Keine Einträge gefunden.
+            <td colspan="5" class="px-5 py-16 text-center text-sm text-text-muted">
+              Keine Einträge für diesen Zeitraum.
             </td>
           </tr>
         </tbody>
@@ -99,25 +102,13 @@ function formatTs(ts: string) {
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="flex items-center justify-between text-sm">
-      <span class="text-text-muted text-xs">
-        Seite {{ page + 1 }} von {{ totalPages }}
+    <div v-if="totalPages > 1" class="flex items-center justify-between">
+      <span class="text-xs text-text-muted">
+        Seite <span class="text-text-secondary font-semibold">{{ page + 1 }}</span> von {{ totalPages }}
       </span>
       <div class="flex gap-2">
-        <button
-          class="btn-ghost text-xs py-1.5"
-          :disabled="page === 0"
-          @click="page--; refresh()"
-        >
-          Zurück
-        </button>
-        <button
-          class="btn-ghost text-xs py-1.5"
-          :disabled="page >= totalPages - 1"
-          @click="page++; refresh()"
-        >
-          Weiter
-        </button>
+        <button class="btn-ghost text-xs" :disabled="page === 0" @click="page--; refresh()">← Zurück</button>
+        <button class="btn-ghost text-xs" :disabled="page >= totalPages - 1" @click="page++; refresh()">Weiter →</button>
       </div>
     </div>
   </div>

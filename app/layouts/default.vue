@@ -1,8 +1,8 @@
 <template>
-  <div class="flex min-h-screen">
+  <div class="min-h-screen bg-bg-base">
     <AppNav />
-    <main class="flex-1 ml-60 min-h-screen">
-      <div class="max-w-7xl mx-auto px-6 py-8">
+    <main class="pt-14">
+      <div class="w-full max-w-[1400px] mx-auto px-6 py-8 animate-fade-in">
         <slot />
       </div>
     </main>

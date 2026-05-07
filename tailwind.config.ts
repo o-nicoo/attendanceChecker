@@ -3,31 +3,42 @@ import type { Config } from 'tailwindcss'
 export default {
   content: [
     './app/**/*.{vue,js,ts,jsx,tsx}',
-    './components/**/*.{vue,js,ts,jsx,tsx}',
-    './layouts/**/*.{vue,js,ts,jsx,tsx}',
-    './pages/**/*.{vue,js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
       colors: {
         bg: {
-          base: '#0a0a0a',
-          card: '#141414',
-          elevated: '#1c1c1c',
-          border: '#242424',
+          base:     '#000000',
+          card:     '#0C0C0F',
+          elevated: '#131317',
+          hover:    '#1A1C2A',
+          border:   '#1E2132',
+          overlay:  '#00000099',
+          deep:     '#000000',
         },
         accent: {
-          DEFAULT: '#3b82f6',
-          dim: '#3b82f620',
-          hover: '#60a5fa',
+          DEFAULT: '#E8EAED',
+          hover:   '#FFFFFF',
+          dim:     '#E8EAED0F',
+          muted:   '#8E8E93',
+          subtle:  '#FFFFFF14',
         },
-        success: '#2ed573',
-        danger: '#ff4757',
-        warn: '#ffa502',
+        silver: {
+          light:    '#C7C7CC',
+          soft:     '#AEAEB2',
+          graphite: '#8E8E93',
+          ice:      '#F2F2F7',
+          steel:    '#48484A',
+          slate:    '#3A3A3C',
+        },
+        success: '#30D158',
+        danger:  '#FF453A',
+        warn:    '#FFD60A',
         text: {
-          primary: '#f0f0f0',
-          secondary: '#888888',
-          muted: '#444444',
+          primary:   '#FFFFFF',
+          secondary: '#98989F',
+          muted:     '#48484A',
+          faint:     '#2C2C2E',
         },
       },
       fontFamily: {
@@ -36,16 +47,16 @@ export default {
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'fade-in': 'fadeIn 0.3s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
+        'fade-in':    'fadeIn 0.25s ease-out',
+        'slide-up':   'slideUp 0.25s ease-out',
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0' },
+          '0%':   { opacity: '0' },
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '0%':   { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },

@@ -1,0 +1,15 @@
+services:
+  nuxt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: always
+    env_file:
+      - .env
+    volumes:
+# Local Development
+      - /Users/nico/Documents/raspDatabase.db:/Users/nico/Documents/raspDatabase.db
+# Production setup
+#      - /home/knd/raspDatabase.db:/home/knd/raspDatabase.db
